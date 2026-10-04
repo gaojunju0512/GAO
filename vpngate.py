@@ -176,11 +176,13 @@ def parse_csv(text):
             if "base64" in h.lower():
                 idx["openvpn_configdata_base64"] = i
                 break
-    pos = {"hostname": idx.get("hostname", 0),
-           "ip": idx.get("ip", 1),
-           "countrylong": idx.get("countrylong", 5),
-           "countryshort": idx.get("countryshort", 6),
-           "openvpn_configdata_base64": idx.get("openvpn_configdata_base64", len(header) - 1)}
+    pos = {
+        "hostname": idx.get("hostname", 0),
+        "ip": idx.get("ip", 1),
+        "countrylong": idx.get("countrylong", 5),
+        "countryshort": idx.get("countryshort", 6),
+        "openvpn_configdata_base64": idx.get("openvpn_configdata_base64", len(header) - 1),
+    }
 
     rows = []
     for ln in data_lines:
@@ -420,7 +422,7 @@ def build_chains_text(data):
         f"# 固定地址: {CHAIN_URL}",
         "#",
         "# 用法: 在 edgetunnel 节点备注里直接粘贴下面任意一行 (名字与指令连写)",
-        "#   例: 日本-住宅-01$sstp://vpn:vpn@vpnxxx.opengw.net:443",
+        "#    例: 日本-住宅-01$sstp://vpn:vpn@vpnxxx.opengw.net:443",
         "# 名字保持不变, 只有 $sstp:// 后面的地址每 30 分钟自动更换",
         "# 账号密码固定 vpn:vpn ; 端口必须保留",
         "# ========================================================",
@@ -456,11 +458,8 @@ def build_chains_text(data):
 
 # edgetunnel 入口地址池: 客户端直连 Cloudflare 的优选 IP:端口 (循环分配给每个国家节点当入口)
 # 可通过环境变量 EDGE_HOSTS 覆盖 (逗号分隔)
-EDGE_HOSTS = [
-    h.strip()
-    for h in os.environ.get(
-      _DEFAULT_EDGE_HOSTS = [
-     "img.856518.xyz:443",
+_DEFAULT_EDGE_HOSTS = [
+    "img.856518.xyz:443",
     "dongbanghong.com:443",
     "cf.qq.ms:443",
     "cf.468123.xyz:443",
@@ -540,10 +539,11 @@ EDGE_HOSTS = [
     "cdn.7zz.cn:443",
     "vps.cheng2001.top:443",
     "cdn.204910.best:443",
-    "www.sofi.com:443",]
-    ).split(",")
-    if h.strip()
+    "www.sofi.com:443",
 ]
+
+_env_hosts = os.environ.get("EDGE_HOSTS", "").strip()
+EDGE_HOSTS = [h.strip() for h in _env_hosts.split(",") if h.strip()] if _env_hosts else _DEFAULT_EDGE_HOSTS
 
 HOSTS_URL = os.environ.get("HOSTS_URL", "https://jerylihub.github.io/gate/hosts.txt")
 
@@ -590,13 +590,9 @@ def build_hosts_text(data):
         res_nodes = [n for n in nodes if n.get("residential") == "residential"]
         dc_nodes = [n for n in nodes if n.get("residential") != "residential"]
         for i, n in enumerate(res_nodes, 1):
-            entry = edge[idx % len(edge)]
-            idx += 1
-            lines.append(f"{entry}#{zh}-住宅-{i:02d}$sstp://vpn:vpn@{n['host']}:{n['port']}")
+            lines.append(f"{zh}-住宅-{i:02d}$sstp://vpn:vpn@{n['host']}:{n['port']}")
         for i, n in enumerate(dc_nodes, 1):
-            entry = edge[idx % len(edge)]
-            idx += 1
-            lines.append(f"{entry}#{zh}-机房-{i:02d}$sstp://vpn:vpn@{n['host']}:{n['port']}")
+            lines.append(f"{zh}-机房-{i:02d}$sstp://vpn:vpn@{n['host']}:{n['port']}")
     return "\n".join(lines) + "\n"
 
 
@@ -695,9 +691,11 @@ def write_outputs(data):
         with open(TEMPLATE_HTML, "r", encoding="utf-8") as f:
             html = f.read()
     else:
-        html = ("<html><head><meta charset='utf-8'><title>VPN Gate SSTP 节点</title></head>"
-                "<body><h1>VPN Gate SSTP 节点</h1><pre id='out'></pre></body>"
-                "<script>fetch('data.json').then(r=>r.json()).then(d=>out.textContent=JSON.stringify(d.stats)).catch(e=>out.textContent='加载失败:'+e)</script></html>")
+        html = (
+            "<html><head><meta charset='utf-8'><title>VPN Gate SSTP 节点</title></head>"
+            "<body><h1>VPN Gate SSTP 节点</h1><pre id='out'></pre></body>"
+            "<script>fetch('data.json').then(r=>r.json()).then(d=>out.textContent=JSON.stringify(d.stats)).catch(e=>out.textContent='加载失败:'+e)</script></html>"
+        )
     with open(html_path, "w", encoding="utf-8") as f:
         f.write(html)
 
