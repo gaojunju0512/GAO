@@ -459,8 +459,8 @@ def build_chains_text(data):
 EDGE_HOSTS = [
     h.strip()
     for h in os.environ.get(
-        "EDGE_HOSTS",
-        "img.856518.xyz:443",
+      _DEFAULT_EDGE_HOSTS = [
+     "img.856518.xyz:443",
     "dongbanghong.com:443",
     "cf.qq.ms:443",
     "cf.468123.xyz:443",
@@ -540,7 +540,7 @@ EDGE_HOSTS = [
     "cdn.7zz.cn:443",
     "vps.cheng2001.top:443",
     "cdn.204910.best:443",
-    "www.sofi.com:443",
+    "www.sofi.com:443",]
     ).split(",")
     if h.strip()
 ]
